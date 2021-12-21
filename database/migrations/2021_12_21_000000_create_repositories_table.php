@@ -17,12 +17,14 @@ class CreateRepositoriesTable extends Migration
             /**
              * I didn't use id() here because I don't want it to autoincrement.
              * It will represent the repository ID from GitHub instead.
+             * 
+             * Using the same names as the GitHub response defined here - https://docs.github.com/en/rest/reference/search#search-repositories
              */
             $table->integer('id')->index();
             $table->string('name');
             $table->string('url');
             $table->timestamp('created_at');
-            $table->timestamp('last_push');
+            $table->timestamp('pushed_at');
             $table->longText('description');
             $table->integer('stargazers_count');
         });
