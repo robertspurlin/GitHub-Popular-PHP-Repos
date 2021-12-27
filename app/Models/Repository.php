@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use GuzzleHttp\Client;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Validator;
-use RuntimeException;
 
 class Repository extends Model
 {
@@ -29,7 +27,7 @@ class Repository extends Model
      * 
      * I considered using the PHP library recommended on the GitHub docs (and it's Laravel port over),
      * but it's implementation does not condider the per_page param which I wanted to pass.
-     * Plus, the library had many other things that I didn't need (like authenciation)
+     * Plus, the library had many other things that I didn't need (like GitHub auth)..
      * So, make the call manually. 
      *
      * @return object
@@ -64,7 +62,7 @@ class Repository extends Model
      * createOrUpdate
      * 
      * A wrapper of Model::upsert, created to abstract the call into this model
-     * and to add validation of the array passed.
+     * and for ease of testing.
      *
      * @param array $repositories
      * @return void

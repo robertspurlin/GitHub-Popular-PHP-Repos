@@ -16,7 +16,7 @@ class RepositoryController extends Controller
      * and return in order of stars descending.
      *
      * @param Request $request
-     * @return void
+     * @return Collection
      */
     public function getRepositories(Request $request): Collection
     {
