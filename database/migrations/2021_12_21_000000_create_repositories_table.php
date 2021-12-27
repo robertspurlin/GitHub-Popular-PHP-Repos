@@ -20,12 +20,12 @@ class CreateRepositoriesTable extends Migration
              * 
              * Using the same names as the GitHub response defined here - https://docs.github.com/en/rest/reference/search#search-repositories
              */
-            $table->integer('id')->index();
+            $table->integer('id')->unique();
             $table->string('name');
             $table->string('url');
             $table->timestamp('created_at');
             $table->timestamp('pushed_at');
-            $table->longText('description');
+            $table->longText('description')->nullable();
             $table->integer('stargazers_count');
         });
     }
