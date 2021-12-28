@@ -21,12 +21,12 @@ class RepositoryController extends Controller
     public function getRepositories(Request $request): Collection
     {
         
-        $APIRepositories = Repository::getGithubRepositories();
+        /* $APIRepositories = Repository::getGithubRepositories();
 
-        Repository::createOrUpdate($APIRepositories->items);
+        Repository::createOrUpdate($APIRepositories->items); */
 
         // Get all records in repositories table, and sort by stargazers_count after returned. 
-        $repositories = Repository::all()->sortByDesc('stargazers_count');
+        $repositories = Repository::all()->sortByDesc('stargazers_count')->values();
 
         return $repositories; 
     }
