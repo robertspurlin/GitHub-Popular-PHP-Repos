@@ -11283,6 +11283,8 @@ textarea.form-control-lg {
 }
 header {
   border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  background: #fff;
+  box-shadow: 1px 0 5px #515151;
   margin-bottom: 3rem;
 }
 header .name {
@@ -11301,4 +11303,46 @@ header .name {
 
 body {
   font-family: Montserrat, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: #eaeaea;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.5em 1em;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: #233e5a;
+  text-transform: uppercase;
+  text-decoration: none;
+  pointer-events: all;
+}
+.button:active, .button:hover, .button:focus {
+  text-decoration: none;
+  color: #fff;
+}
+.button.disabled {
+  background: #666;
+  pointer-events: none;
+}
+
+.toast-container {
+  z-index: 10000;
+  right: 0;
+}
+.toast-container .toast {
+  background-color: #fff;
+}
+
+.card {
+  background-color: #d6f1ff;
+}
+
+.list-group {
+  border: 3px solid #233e5a;
+  border-radius: 5px;
+}
+
+.list-group-item:nth-of-type(odd) {
+  background-color: #eff;
 }

@@ -5281,6 +5281,50 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -5290,31 +5334,66 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      loading: true,
       repositories: [],
       displayedRepositories: [],
       pages: [],
       currentPage: 1,
-      maxPerPage: 6,
-      maxVisibleButtons: 5
+      maxPerPage: 10,
+      maxVisibleButtons: 5,
+      errorMessage: ""
     };
   },
   mounted: function mounted() {
-    this.getRepositories();
+    this.getRepositories(); // Initialize toast 
+
+    var toast = new window.bootstrap.Toast(document.getElementById('toast'));
   },
   watch: {
+    // When currentPage changes, it will attempt to paginate the results. 
     currentPage: function currentPage() {
       this.displayedRepositories = this.paginateRepositories();
     }
   },
   methods: {
+    // On component mounted and when updateRepositories is called
     getRepositories: function getRepositories() {
       var that = this;
       window.axios.get('/api/getRepositories').then(function (response) {
-        console.log(response.data);
         that.repositories = response.data;
         that.setPages();
+      })["catch"](function (error) {
+        var toastElem = document.getElementById('toast');
+        var toast = window.bootstrap.Toast.getInstance(toastElem);
+        that.errorMessage = error.response.data;
+        toast.show();
+        that.loading = false;
       });
     },
+    // On populate button click
+    updateRepositories: function updateRepositories() {
+      var that = this;
+      that.loading = true;
+      window.axios.post('/api/updateRepositories').then(function (response) {
+        that.repositories = [];
+        that.displayedRepositories = [];
+        that.pages = [];
+        that.currentPage = 1;
+        that.getRepositories();
+      })["catch"](function (error) {
+        var toastElem = document.getElementById('toast');
+        var toast = window.bootstrap.Toast.getInstance(toastElem);
+        that.errorMessage = "GitHub API responsed with " + error.response.data;
+
+        if (error.response.data == 403) {
+          that.errorMessage = "GitHub API limit reached (10 requests/minute) - showing existing repositories.";
+        }
+
+        toast.show();
+        that.loading = false;
+      });
+    },
+    // After repositories have been grabbed, divide into 'pages' and paginate
     setPages: function setPages() {
       var numberOfPages = Math.ceil(this.repositories.length / this.maxPerPage);
 
@@ -5323,14 +5402,21 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.displayedRepositories = this.paginateRepositories();
+      this.loading = false;
     },
+    // Returns the slice of what should be showing on x page (currentPage watch)
     paginateRepositories: function paginateRepositories() {
       var to = this.currentPage * this.maxPerPage;
       var from = to - this.maxPerPage;
-      return this.repositories.slice(from, to);
+      return this.repositories.length > 0 ? this.repositories.slice(from, to) : [];
     },
+    // Pagination component emits event that calls this
     onPageChange: function onPageChange(page) {
       this.currentPage = page;
+    },
+    // In case a null description comes back
+    parseNullDescription: function parseNullDescription(description) {
+      return description !== null && description !== void 0 ? description : '(no description provided)';
     }
   }
 });
@@ -5387,6 +5473,24 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
     pages: {
@@ -5404,6 +5508,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     startPage: function startPage() {
+      // If in between, show 2 before current page
       if (this.currentPage <= 2) {
         return 1;
       }
@@ -5428,6 +5533,11 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
+    goToFirst: function goToFirst() {
+      if (this.currentPage != 1) {
+        this.$emit("pageChange", 1);
+      }
+    },
     goBack: function goBack() {
       if (this.currentPage != 1) {
         this.$emit("pageChange", this.currentPage - 1);
@@ -5441,6 +5551,11 @@ __webpack_require__.r(__webpack_exports__);
     goForward: function goForward() {
       if (this.currentPage != this.pages[this.pages.length - 1]) {
         this.$emit("pageChange", this.currentPage + 1);
+      }
+    },
+    goToLast: function goToLast() {
+      if (this.currentPage != this.pages[this.pages.length - 1]) {
+        this.$emit("pageChange", this.pages[this.pages.length - 1]);
       }
     }
   }
@@ -5469,10 +5584,31 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: {
     name: {
       type: String,
+      required: true
+    },
+    stars: {
+      type: Number,
       required: true
     },
     id: {
@@ -5482,6 +5618,53 @@ __webpack_require__.r(__webpack_exports__);
     description: {
       type: String,
       required: true
+    },
+    createdAt: {
+      type: String,
+      required: true
+    },
+    pushedAt: {
+      type: String,
+      required: true
+    },
+    url: {
+      type: String,
+      required: true
+    }
+  },
+  data: function data() {
+    return {
+      toggleDetailedView: false
+    };
+  },
+  computed: {
+    formattedCreatedAtDate: function formattedCreatedAtDate() {
+      return this.dateTimeFormat(this.createdAt);
+    },
+    formattedPushedAtDate: function formattedPushedAtDate() {
+      return this.dateTimeFormat(this.pushedAt);
+    },
+    formattedStars: function formattedStars() {
+      return this.stars.toLocaleString();
+    }
+  },
+  methods: {
+    toggleFullDetails: function toggleFullDetails() {
+      this.toggleDetailedView = !this.toggleDetailedView;
+    },
+    dateTimeFormat: function dateTimeFormat(dateTime) {
+      var d = new Date(dateTime);
+      var UTCDate = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes());
+      var date = new Intl.DateTimeFormat('en', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        timeZoneName: 'short',
+        timeZone: 'UTC'
+      }).format(UTCDate);
+      return date;
     }
   }
 });
@@ -5513,7 +5696,6 @@ var app = new Vue({
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
 
 window.Vue = vue__WEBPACK_IMPORTED_MODULE_0__["default"];
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
@@ -5525,7 +5707,7 @@ window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
+window.bootstrap = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
@@ -28221,53 +28403,133 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
+    _c("div", { staticClass: "toast-container position-absolute p-3" }, [
+      _c("div", { staticClass: "toast", attrs: { id: "toast" } }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _c("div", { staticClass: "toast-body" }, [
+          _vm._v("\n\t\t\t\t" + _vm._s(_vm.errorMessage) + "\n\t\t\t"),
+        ]),
+      ]),
+    ]),
+    _vm._v(" "),
     _c("div", { staticClass: "container" }, [
+      _vm._m(1),
+      _vm._v(" "),
+      _c("div", { staticClass: "row d-flex justify-content-end" }, [
+        _c("div", { staticClass: "col-auto" }, [
+          _c(
+            "a",
+            {
+              staticClass: "button",
+              class: { disabled: _vm.loading },
+              attrs: { href: "#!" },
+              on: { click: _vm.updateRepositories },
+            },
+            [_vm._v("\n\t\t\t\t Populate Repositories\n\t\t\t\t")]
+          ),
+        ]),
+      ]),
+      _vm._v(" "),
       _c(
         "div",
-        { staticClass: "row" },
-        [
-          _vm._m(0),
-          _vm._v(" "),
-          _vm._l(_vm.displayedRepositories, function (repository) {
-            return _c(
-              "div",
-              {
-                key: repository.id,
-                staticClass: "col-xl-4 col-md-6 col-12 my-3",
-              },
-              [
-                _c("repository", {
-                  attrs: {
-                    name: repository.name,
-                    id: repository.id,
-                    description: repository.description,
-                  },
-                }),
-              ],
-              1
-            )
-          }),
-        ],
-        2
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: _vm.loading,
+              expression: "loading",
+            },
+          ],
+          staticClass: "row",
+        },
+        [_vm._m(2)]
       ),
       _vm._v(" "),
-      _c("div", { staticClass: "row justify-content-end" }, [
-        _c(
-          "div",
-          { staticClass: "col-auto" },
-          [
-            _c("pagination", {
-              attrs: {
-                pages: _vm.pages,
-                currentPage: _vm.currentPage,
-                maxVisibleButtons: _vm.maxVisibleButtons,
-              },
-              on: { pageChange: _vm.onPageChange },
-            }),
+      _c(
+        "div",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: !_vm.loading && _vm.displayedRepositories.length > 0,
+              expression: "!loading && displayedRepositories.length > 0",
+            },
           ],
-          1
-        ),
-      ]),
+          staticClass: "row",
+        },
+        _vm._l(_vm.displayedRepositories, function (repository) {
+          return _c(
+            "div",
+            { key: repository.id, staticClass: "col-md-6 col-12 my-2" },
+            [
+              _c("repository", {
+                attrs: {
+                  name: repository.name,
+                  stars: repository.stargazers_count,
+                  id: repository.id,
+                  description: _vm.parseNullDescription(repository.description),
+                  createdAt: repository.created_at,
+                  pushedAt: repository.pushed_at,
+                  url: repository.url,
+                },
+              }),
+            ],
+            1
+          )
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: !_vm.loading && _vm.displayedRepositories.length == 0,
+              expression: "!loading && displayedRepositories.length == 0",
+            },
+          ],
+          staticClass: "row",
+        },
+        [_vm._m(3)]
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: !_vm.loading,
+              expression: "!loading",
+            },
+          ],
+          staticClass: "row justify-content-end",
+        },
+        [
+          _c(
+            "div",
+            { staticClass: "col-auto mt-3" },
+            [
+              _c("pagination", {
+                attrs: {
+                  pages: _vm.pages,
+                  currentPage: _vm.currentPage,
+                  maxVisibleButtons: _vm.maxVisibleButtons,
+                },
+                on: { pageChange: _vm.onPageChange },
+              }),
+            ],
+            1
+          ),
+        ]
+      ),
     ]),
   ])
 }
@@ -28276,8 +28538,40 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-12 text-center mb-5" }, [
-      _c("h1", [_vm._v("Popular PHP Repositories")]),
+    return _c("div", { staticClass: "toast-header" }, [
+      _c("strong", { staticClass: "me-auto" }, [_vm._v("Error")]),
+    ])
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-12 text-center mb-5" }, [
+        _c("h1", [_vm._v("Popular PHP Repositories")]),
+      ]),
+    ])
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-12 text-center" }, [
+      _c("div", { staticClass: "spinner-border", attrs: { role: "status" } }, [
+        _c("span", { staticClass: "visually-hidden" }, [_vm._v("Loading...")]),
+      ]),
+    ])
+  },
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-12 text-center my-5" }, [
+      _c("p", [
+        _vm._v(
+          'No repositories stored. Click "Populate Repositories" button above to pull from GitHub, store in database, and show.'
+        ),
+      ]),
     ])
   },
 ]
@@ -28308,24 +28602,47 @@ var render = function () {
       "ul",
       { staticClass: "pagination" },
       [
-        _c(
-          "li",
-          {
-            staticClass: "page-item",
-            class: { disabled: _vm.currentPage == 1 },
-          },
-          [
-            _c(
-              "a",
+        _vm.pages.length > 0
+          ? _c(
+              "li",
               {
-                staticClass: "page-link",
-                attrs: { href: "#" },
-                on: { click: _vm.goBack },
+                staticClass: "page-item",
+                class: { disabled: _vm.currentPage == 1 },
               },
-              [_vm._v("\n\t\t\t\tPrevious\n\t\t\t")]
-            ),
-          ]
-        ),
+              [
+                _c(
+                  "a",
+                  {
+                    staticClass: "page-link",
+                    attrs: { href: "#!" },
+                    on: { click: _vm.goToFirst },
+                  },
+                  [_vm._v("\n\t\t\t\tFirst\n\t\t\t")]
+                ),
+              ]
+            )
+          : _vm._e(),
+        _vm._v(" "),
+        _vm.pages.length > 0
+          ? _c(
+              "li",
+              {
+                staticClass: "page-item",
+                class: { disabled: _vm.currentPage == 1 },
+              },
+              [
+                _c(
+                  "a",
+                  {
+                    staticClass: "page-link",
+                    attrs: { href: "#!" },
+                    on: { click: _vm.goBack },
+                  },
+                  [_vm._v("\n\t\t\t\tPrevious\n\t\t\t")]
+                ),
+              ]
+            )
+          : _vm._e(),
         _vm._v(" "),
         _vm._l(_vm.pagesToShow, function (page) {
           return _c(
@@ -28340,7 +28657,7 @@ var render = function () {
                 "a",
                 {
                   staticClass: "page-link",
-                  attrs: { href: "#" },
+                  attrs: { href: "#!" },
                   on: {
                     click: function ($event) {
                       return _vm.showPage(page)
@@ -28353,26 +28670,51 @@ var render = function () {
           )
         }),
         _vm._v(" "),
-        _c(
-          "li",
-          {
-            staticClass: "page-item",
-            class: {
-              disabled: _vm.currentPage == _vm.pages[_vm.pages.length - 1],
-            },
-          },
-          [
-            _c(
-              "a",
+        _vm.pages.length > 0
+          ? _c(
+              "li",
               {
-                staticClass: "page-link",
-                attrs: { href: "#" },
-                on: { click: _vm.goForward },
+                staticClass: "page-item",
+                class: {
+                  disabled: _vm.currentPage == _vm.pages[_vm.pages.length - 1],
+                },
               },
-              [_vm._v("\n\t\t\t\tNext\n\t\t\t")]
-            ),
-          ]
-        ),
+              [
+                _c(
+                  "a",
+                  {
+                    staticClass: "page-link",
+                    attrs: { href: "#!" },
+                    on: { click: _vm.goForward },
+                  },
+                  [_vm._v("\n\t\t\t\tNext\n\t\t\t")]
+                ),
+              ]
+            )
+          : _vm._e(),
+        _vm._v(" "),
+        _vm.pages.length > 0
+          ? _c(
+              "li",
+              {
+                staticClass: "page-item",
+                class: {
+                  disabled: _vm.currentPage == _vm.pages[_vm.pages.length - 1],
+                },
+              },
+              [
+                _c(
+                  "a",
+                  {
+                    staticClass: "page-link",
+                    attrs: { href: "#!" },
+                    on: { click: _vm.goToLast },
+                  },
+                  [_vm._v("\n\t\t\t\tLast\n\t\t\t")]
+                ),
+              ]
+            )
+          : _vm._e(),
       ],
       2
     ),
@@ -28401,17 +28743,100 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "card h-100 bg-light" }, [
+  return _c("div", { staticClass: "card h-100" }, [
     _c("div", { staticClass: "card-body" }, [
       _c("h3", { staticClass: "card-title fw-bold" }, [
         _vm._v(_vm._s(_vm.name)),
       ]),
       _vm._v(" "),
-      _c("p", { staticClass: "card-subtitle text-muted" }, [
-        _vm._v("ID: " + _vm._s(_vm.id)),
+      _c("div", { staticClass: "d-flex align-items-center mb-2" }, [
+        _c(
+          "svg",
+          {
+            staticClass: "bi bi-star-fill",
+            attrs: {
+              xmlns: "http://www.w3.org/2000/svg",
+              width: "20",
+              height: "20",
+              fill: "currentColor",
+              viewBox: "0 0 16 16",
+            },
+          },
+          [
+            _c("path", {
+              attrs: {
+                d: "M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z",
+              },
+            }),
+          ]
+        ),
+        _vm._v(" "),
+        _c("p", { staticClass: "ms-2 mb-0" }, [
+          _vm._v(_vm._s(_vm.formattedStars)),
+        ]),
       ]),
       _vm._v(" "),
-      _c("p", { staticClass: "card-text" }, [_vm._v(_vm._s(_vm.description))]),
+      _c(
+        "ul",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: _vm.toggleDetailedView,
+              expression: "toggleDetailedView",
+            },
+          ],
+          staticClass: "list-group list-group-flush my-3",
+        },
+        [
+          _c("li", { staticClass: "list-group-item" }, [
+            _c("b", [_vm._v("Name:")]),
+            _vm._v(" " + _vm._s(_vm.name)),
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "list-group-item" }, [
+            _c("b", [_vm._v("Number of Stars:")]),
+            _vm._v(" " + _vm._s(_vm.formattedStars)),
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "list-group-item" }, [
+            _c("b", [_vm._v("ID:")]),
+            _vm._v(" " + _vm._s(_vm.id)),
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "list-group-item" }, [
+            _c("b", [_vm._v("Description:")]),
+            _vm._v(" " + _vm._s(_vm.description)),
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "list-group-item" }, [
+            _c("b", [_vm._v("Created At:")]),
+            _vm._v(" " + _vm._s(_vm.formattedCreatedAtDate)),
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "list-group-item" }, [
+            _c("b", [_vm._v("Pushed At:")]),
+            _vm._v(" " + _vm._s(_vm.formattedPushedAtDate)),
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "list-group-item" }, [
+            _c("b", [_vm._v("URL:")]),
+            _vm._v(" "),
+            _c("a", { attrs: { target: "_blank", href: _vm.url } }, [
+              _vm._v(_vm._s(_vm.url)),
+            ]),
+          ]),
+        ]
+      ),
+      _vm._v(" "),
+      _c("a", { attrs: { href: "#!" }, on: { click: _vm.toggleFullDetails } }, [
+        _vm._v(
+          "(" +
+            _vm._s(_vm.toggleDetailedView ? "Hide" : "Show") +
+            " Detailed View)"
+        ),
+      ]),
     ]),
   ])
 }

@@ -2,11 +2,20 @@
 	<nav aria-label="Repository Pagination">
 		<ul class="pagination">
 
-			<li class="page-item" :class="{disabled: currentPage == 1}">
+			<li class="page-item" :class="{disabled: currentPage == 1}" v-if='pages.length > 0'>
+				<a 
+				 @click="goToFirst"
+				 class="page-link"
+				 href="#!">
+					First
+				</a>
+			</li>
+
+			<li class="page-item" :class="{disabled: currentPage == 1}" v-if='pages.length > 0'>
 				<a 
 				 @click="goBack"
 				 class="page-link"
-				 href="#">
+				 href="#!">
 					Previous
 				</a>
 			</li>
@@ -18,18 +27,27 @@
 			 class="page-item">
 				<a
 				 @click='showPage(page)'
-				 href="#"
+				 href="#!"
 				 class="page-link">
 				 {{ page }}
 				</a>
 			</li>
 
-			<li class="page-item" :class="{disabled: currentPage == pages[pages.length - 1]}">
+			<li class="page-item" :class="{disabled: currentPage == pages[pages.length - 1]}" v-if='pages.length > 0'>
 				<a 
 				 @click='goForward'
 				 class="page-link" 
-				 href="#">
+				 href="#!">
 					Next
+				</a>
+			</li>
+
+			<li class="page-item" :class="{disabled: currentPage == pages[pages.length - 1]}" v-if='pages.length > 0'>
+				<a 
+				 @click="goToLast"
+				 class="page-link"
+				 href="#!">
+					Last
 				</a>
 			</li>
 
@@ -56,6 +74,7 @@ export default {
 
 	computed: {
 		startPage() {
+			// If in between, show 2 before current page
 			if (this.currentPage <= 2) {
 				return 1;
 			}
@@ -83,6 +102,12 @@ export default {
 	},
 
 	methods: {
+		goToFirst() {
+			if (this.currentPage != 1) {
+				this.$emit("pageChange", 1);
+			}
+		},
+
 		goBack() {
 			if (this.currentPage != 1) {
 				this.$emit("pageChange", this.currentPage - 1);
@@ -98,6 +123,12 @@ export default {
 		goForward() {
 			if (this.currentPage != this.pages[this.pages.length - 1]) {
 				this.$emit("pageChange", this.currentPage + 1);
+			}
+		}, 
+
+		goToLast() {
+			if (this.currentPage != this.pages[this.pages.length - 1]) {
+				this.$emit("pageChange", this.pages[this.pages.length - 1]);
 			}
 		}
 

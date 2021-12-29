@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use GuzzleHttp\Client;
 use Carbon\Carbon;
+use ErrorException;
+use GuzzleHttp\Exception\RequestException;
 
 class Repository extends Model
 {
@@ -50,28 +52,33 @@ class Repository extends Model
 
         $client = new Client;
 
-        $request = $client->request('GET', $fullQueryString, [
-            'headers' => $headers
-        ]);
+        try {
+            $request = $client->request('GET', $fullQueryString, [
+                'headers' => $headers
+            ]);
+
+        } catch (RequestException $e) {
+            throw new ErrorException($e->getResponse()->getStatusCode() ?: "Undefined error");
+        }
 
         return json_decode($request->getBody()->getContents());
     }
 
 
     /**
-     * createOrUpdate
+     * create
      * 
-     * A wrapper of Model::upsert, created to abstract the call into this model
-     * and for ease of testing.
+     * A wrapper of Model::insert, created to abstract the call into this model
+     * while ensuring that array passed will have everything necessary. 
      *
      * @param array $repositories
      * @return void
      */
-    public static function createOrUpdate(array $repositories): void
+    public static function create(array $repositories): void
     {
 
         foreach ($repositories as $repository) {
-            $upsertArr[] = [
+            $insertArr[] = [
                 'id' => $repository->id,
                 'name' => $repository->name,
                 'url' => $repository->html_url,
@@ -82,27 +89,7 @@ class Repository extends Model
             ];
         }
 
-        /**
-         * Upsert translates to:
-         * 
-         * INSERT INTO repositories (id, name, url, created_at, pushed_at, description, stargazers_count)
-         * (1, 'x', 'x.com', '2022-01-01 00:00:00', '2022-01-01 00:00:00', 'x', 10),
-         * (2, 'x', 'x.com', '2022-01-01 00:00:00', '2022-01-01 00:00:00', 'x', 10)
-         * ON DUPLICATE KEY UPDATE
-         * id = VALUES(id),
-         * name = VALUES(name),
-         * url = VALUES(url),
-         * created_at = VALUES(created_at),
-         * pushed_at = VALUES(pushed_at),
-         * description = VALUES(description),
-         * stargazers_count = VALUES(description);
-         */
-
-        self::upsert(
-            $upsertArr, 
-            'id', 
-            ['name', 'url', 'created_at', 'pushed_at', 'description', 'stargazers_count']
-        );
+        self::insert($insertArr);
 
     }
 }

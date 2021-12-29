@@ -17,3 +17,5 @@ use App\Http\Controllers\RepositoryController;
 */
 
 Route::get('/getRepositories', [RepositoryController::class, 'getRepositories']);
+
+Route::post('/updateRepositories', [RepositoryController::class, 'updateRepositories']);
