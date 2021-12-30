@@ -4,6 +4,8 @@ Hello, friends, and thanks again for your consideration of me for this position.
 
 This is a Laravel application, built with the most recent version of Laravel (at this writing), PHP 8.1, and Vue 2.6 / Bootstrap 5 for the front end. This application was built using Docker containers (one for the DB, and one for the application), using Laravel Sail as a base starting point to build these containers.
 
+
+
 ## Installation
 
 First, ensure that you either have Docker and Docker Compose or Docker Desktop (it comes with both) on your computer. I used Docker Desktop on an Intel Chip Mac. https://www.docker.com/products/docker-desktop
@@ -56,3 +58,27 @@ Finally, let's install Node, it's dependencies, and compile everything needed fo
 ```
 
 You are now free to hit http://localhost in your browser of choice.
+
+
+
+## Usage
+
+After hitting http://localhost, you should be greeted with a page titled "Popular PHP Repositories", a button labled "Populate Repositories", and a message saying No repositories stored. 'Click "Populate Repositories" button above to pull from GitHub, store in database, and show.'. 
+
+Click the "Populate Repositories" button, and an AJAX call will be made to retrieve the 100 most starred PHP repositories via the GitHub API (search terms: "php language:php is:public", filters: sort=stars, per_page=100), and store them in the repositories database. All fields requested (ID, Name, URL, created date, last push date, description, and number of stars) are grabbed from the response and stored. Then, another AJAX request will be made to retrieve the repositories from the database (sorted by number of stars) to populate the page.
+
+The repositories are paginated to 10 per page, and the pagination is below the repositories. You are also able to click through and see all information stored for each repository.
+
+If you spam the "Populate Repositories" button (to the tune of 10/minute), you will recieve a Toast notification on the top right side of the page denoting that the GitHub API limit has been reached.
+
+
+
+## Testing
+
+Tests have been made to ensure that the application is working as intended - they are defined in /tests. To run the tests, run this command in the app directory:
+
+```
+./vendor/bin/sail test
+```
+
+You should recieve output denoting that the tests have been ran and that they passed.
