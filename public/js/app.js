@@ -5660,11 +5660,9 @@ __webpack_require__.r(__webpack_exports__);
         day: 'numeric',
         year: 'numeric',
         hour: 'numeric',
-        minute: 'numeric',
-        timeZoneName: 'short',
-        timeZone: 'UTC'
+        minute: 'numeric'
       }).format(UTCDate);
-      return date;
+      return date + ' UTC';
     }
   }
 });

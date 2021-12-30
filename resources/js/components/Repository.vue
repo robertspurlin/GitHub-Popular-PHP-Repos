@@ -94,13 +94,11 @@ export default {
 					year: 'numeric',
 					hour: 'numeric',
 					minute: 'numeric',
-					timeZoneName: 'short',
-					timeZone: 'UTC'
 				} 
 			)
 			.format(UTCDate);
 
-			return date;
+			return date + ' UTC';
 		}
 	}
 }
