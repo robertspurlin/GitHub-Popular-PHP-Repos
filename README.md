@@ -112,8 +112,12 @@ You should recieve output denoting that the tests have been ran and that they pa
 
 - When testing the GitHub API search, I found that weird results show up when you don't specify a keyword when searching by language. The documentation implies that you shouldn't be able to use the language param without a keyword... so I settled on using "php" as my keyword with the language param.
 
-- There are PHP libraries that are wrappers for the GitHub API, but I found that it's search capabilities don't support the per_page param. Since I wanted to get the max per one request (100), and to only make one request, I decided to do the call manually via Guzzle (unauthenciated, which is why the application is limited to 10 calls/minute).
+- There are PHP libraries that are wrappers for the GitHub API, but I found that it's search capabilities don't support the per_page param. Since I wanted to get the max per one request (100), and to only make one request, I decided to do the call manually via Guzzle (unauthenicated, which is why the application is limited to 10 calls/minute).
 
 - I played with the idea of showing the list of repositories in a DataTable, which is what I am used to doing in my professional work. However, I found that to be a bit boring. So, I decided to do 50% width cards of each, with a custom made pagination. 
 
-- I thank you for your time and consideration, and hope the rest of the job search goes well. I look forward to your feedback and the next steps of the process. If there are any questions, please feel free to reach out to me via email or Slack in NashDev. Happy New Year!
+
+<hr/>
+
+
+I thank you for your time and consideration, and hope the rest of the job search goes well. I look forward to your feedback and the next steps of the process. If there are any questions, please feel free to reach out to me via email or Slack in NashDev. Happy New Year!
