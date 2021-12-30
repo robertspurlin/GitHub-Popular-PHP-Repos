@@ -29,7 +29,9 @@ After the helper Docker container is complete installing everything, starting bo
 ./vendor/bin/sail up -d
 ```
 
-The command above will create the two Docker containers and start them. It might take a minute or two, as it has to create the images needed for the containers on the first run. But after that, starting up both containers should take very little time.
+(When running the command above locally, `laravel.test Error` appeared as the first line. However, it doesn't seem to be breaking anything. If you see this error as well, I would disregard it.)
+
+The command above will create the two Docker containers and start them. It might take a minute or two, as it has to create the images needed for the containers on the first run. But after that, starting up both containers should take very little time. 
 
 You should now be able to connect to the DB using your MySQL client of choice (host: 127.0.0.1, port: 3306, username: sail, password: password) and see that there is an empty schema already created called github_popular_php_repositories.
 
@@ -100,7 +102,7 @@ Tests have been made to ensure that the application is working as intended - the
 ./vendor/bin/sail test
 ```
 
-You should recieve output denoting that the tests have been ran and that they passed.
+You should recieve output denoting that the tests have been ran and that they passed. If the tests don't pass because the API is responding with 422, it most likely means that the GitHub API limit has been reached - try again in another minute and they should all pass.
 
 
 
@@ -114,7 +116,9 @@ You should recieve output denoting that the tests have been ran and that they pa
 
 - There are PHP libraries that are wrappers for the GitHub API, but I found that it's search capabilities don't support the per_page param. Since I wanted to get the max per one request (100), and to only make one request, I decided to do the call manually via Guzzle (unauthenicated, which is why the application is limited to 10 calls/minute).
 
-- I played with the idea of showing the list of repositories in a DataTable, which is what I am used to doing in my professional work. However, I found that to be a bit boring. So, I decided to do 50% width cards of each, with a custom made pagination. 
+- Speaking of the number of repositories returned, I noticed that no number was specified. In professional work, I would bring up the issue with the Product Owner/Project Manager to get more clarity.
+
+- I played with the idea of showing the list of repositories in a DataTable, which is what I am used to doing in my professional work. However, I found that to be a bit boring (also, not fully responsive in a way that was acceptable to me). So, I decided to do 50% width cards (100% on mobile) of each, with a custom made pagination. 
 
 
 <hr/>
