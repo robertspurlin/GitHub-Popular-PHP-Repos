@@ -1,4 +1,4 @@
-## PHP Popular GitHub Repositories
+## Popular PHP GitHub Repositories
 
 Hello, friends, and thanks again for your consideration of me for this position.
 
@@ -33,7 +33,7 @@ The command above will create the two Docker containers and start them. It might
 
 You should now be able to connect to the DB using your MySQL client of choice (host: 127.0.0.1, port: 3306, username: sail, password: password) and see that there is an empty schema already created called github_popular_php_repositories.
 
-You can pass the Laravel Docker container commands using Sail. This method can be used for anything with Composer, Node, and any other Artisan commands. You can test this (to show a list of the available Artisan commands) using:
+You can pass the Laravel Docker container commands using Sail. This method can be used for anything with Composer, Node, and any Artisan commands. You can test this (to show a list of the available Artisan commands) using:
 
 ```
 ./vendor/bin/sail artisan list
@@ -63,11 +63,26 @@ You are now free to hit http://localhost in your browser of choice.
 
 ## Usage
 
-After hitting http://localhost, you should be greeted with a page titled "Popular PHP Repositories", a button labled "Populate Repositories", and a message saying No repositories stored. 'Click "Populate Repositories" button above to pull from GitHub, store in database, and show.'. 
+![initial screen](screenshots/initial.png)
 
-Click the "Populate Repositories" button, and an AJAX call will be made to retrieve the 100 most starred PHP repositories via the GitHub API (search terms: "php language:php is:public", filters: sort=stars, per_page=100), and store them in the repositories database. All fields requested (ID, Name, URL, created date, last push date, description, and number of stars) are grabbed from the response and stored. Then, another AJAX request will be made to retrieve the repositories from the database (sorted by number of stars) to populate the page.
+After hitting http://localhost, you should be greeted with a page titled "Popular PHP Repositories", a button labled "Populate Repositories", and a message saying:
 
-The repositories are paginated to 10 per page, and the pagination is below the repositories. You are also able to click through and see all information stored for each repository.
+```
+No repositories stored. 'Click "Populate Repositories" button above to pull from GitHub, store in database, and show.
+```
+
+Click the "Populate Repositories" button, and an AJAX call will be made to:
+1. Truncate the repositories table,
+2. retrieve the 100 most starred PHP repositories via the GitHub API (search terms: "php language:php is:public", filters: sort=stars, per_page=100), 
+3. and store them in the repositories database. 
+
+All fields requested (ID, Name, URL, created date, last push date, description, and number of stars) are grabbed from the response and stored. 
+
+Then, another AJAX request will be made to retrieve the repositories from the database (sorted by number of stars) to populate the page.
+
+![populated screen](screenshots/populated.png)
+
+The repositories are paginated to 10 per page, and the pagination is below the repositories. You are also able to click through and see all information stored for each repository via the "Show Detailed View" link.
 
 If you spam the "Populate Repositories" button (to the tune of 10/minute), you will recieve a Toast notification on the top right side of the page denoting that the GitHub API limit has been reached.
 
@@ -82,3 +97,11 @@ Tests have been made to ensure that the application is working as intended - the
 ```
 
 You should recieve output denoting that the tests have been ran and that they passed.
+
+
+
+## Notes
+
+- I would never commit the .env, but it is necessary here to make Sail spin up the schema and user properly. Also, it ensures that it will always connect to the DB container in the correct manner.
+
+- I recognize that there are some holes in my testing, namely the Exception catches when the GitHub API responds with Too Many Requests. I chose not to automate that part of my testing because I want to ensure that if testing was done before the initial load of the page, there would still be enough requests left to populate the list. I also could've tested more of the front end experience (such as ensuring that the lists show up after a simulated click of the button), but thought that the API testing has enough overlap to ensure that all things are working.
