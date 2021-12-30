@@ -72,7 +72,7 @@ After hitting http://localhost, you should be greeted with a page titled "Popula
 When the AJAX call returns an empty object, you should see a message saying:
 
 ```
-No repositories stored. 'Click "Populate Repositories" button above to pull from GitHub, store in database, and show.
+No repositories stored. Click "Populate Repositories" button above to pull from GitHub, store in database, and show.
 ```
 
 Click the "Populate Repositories" button, and an AJAX call will be made to:
@@ -96,7 +96,7 @@ If you spam the "Populate Repositories" button (to the tune of 10/minute), you w
 
 ## Testing
 
-Tests have been made to ensure that the application is working as intended - they are defined in /tests. To run the tests, run this command in the app directory:
+Tests have been made to ensure that the application is working as intended - they are defined in /tests. To run the tests, run this command in the directory:
 
 ```
 ./vendor/bin/sail test
