@@ -65,7 +65,9 @@ You are now free to hit http://localhost in your browser of choice.
 
 ![initial screen](screenshots/initial.png)
 
-After hitting http://localhost, you should be greeted with a page titled "Popular PHP Repositories", a button labled "Populate Repositories", and a message saying:
+After hitting http://localhost, you should be greeted with a page titled "Popular PHP Repositories", and a button labled "Populate Repositories". An AJAX call is made to grab all repositories stored.
+
+When the AJAX call returns an empty object, you should see a message saying:
 
 ```
 No repositories stored. 'Click "Populate Repositories" button above to pull from GitHub, store in database, and show.
@@ -86,6 +88,8 @@ The repositories are paginated to 10 per page, and the pagination is below the r
 
 If you spam the "Populate Repositories" button (to the tune of 10/minute), you will recieve a Toast notification on the top right side of the page denoting that the GitHub API limit has been reached.
 
+![toast notification](screenshots/toast.png)
+
 
 
 ## Testing
@@ -102,6 +106,14 @@ You should recieve output denoting that the tests have been ran and that they pa
 
 ## Notes
 
-- I would never commit the .env, but it is necessary here to make Sail spin up the schema and user properly. Also, it ensures that it will always connect to the DB container in the correct manner.
+- I would never commit the .env, but it is necessary here to make Sail spin up the schema and user properly. Also, it ensures that it will always connect to the DB container in the correct manner immediately after a clone and `sail up`.
 
 - I recognize that there are some holes in my testing, namely the Exception catches when the GitHub API responds with Too Many Requests. I chose not to automate that part of my testing because I want to ensure that if testing was done before the initial load of the page, there would still be enough requests left to populate the list. I also could've tested more of the front end experience (such as ensuring that the lists show up after a simulated click of the button), but thought that the API testing has enough overlap to ensure that all things are working.
+
+- When testing the GitHub API search, I found that weird results show up when you don't specify a keyword when searching by language. The documentation implies that you shouldn't be able to use the language param without a keyword... so I settled on using "php" as my keyword with the language param.
+
+- There are PHP libraries that are wrappers for the GitHub API, but I found that it's search capabilities don't support the per_page param. Since I wanted to get the max per one request (100), and to only make one request, I decided to do the call manually via Guzzle (unauthenciated, which is why the application is limited to 10 calls/minute).
+
+- I played with the idea of showing the list of repositories in a DataTable, which is what I am used to doing in my professional work. However, I found that to be a bit boring. So, I decided to do 50% width cards of each, with a custom made pagination. 
+
+- I thank you for your time and consideration, and hope the rest of the job search goes well. I look forward to your feedback and the next steps of the process. If there are any questions, please feel free to reach out to me via email or Slack in NashDev. Happy New Year!
